@@ -21,7 +21,7 @@ func main() {
 	flag.Parse()
 	if *templateFile == "" {
 		flag.PrintDefaults()
-		os.Exit(3)
+		os.Exit(1)
 	}
 
 	template, err := goformation.Open(*templateFile)
@@ -44,6 +44,7 @@ func main() {
 	if *quiet != true {
 		for name, details := range results {
 			fmt.Printf("Resource: %s\n", name)
+			fmt.Printf("Type: %s\n", details[0].AwsType())
 			for _, r := range details {
 				fmt.Printf("\t")
 				if r.State() == 0 {
