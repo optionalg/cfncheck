@@ -1,0 +1,13 @@
+---
+AWSTemplateFormatVersion: 2010-09-09
+Description: Minimal test CloudFormation template
+
+Resources:
+    WithGroupDescription:
+        Type: AWS::EC2::SecurityGroup
+        Properties:
+            GroupDescription: An SG with a description
+
+    NoGroupDescription:
+        Type: AWS::EC2::SecurityGroup
+        Properties:
