@@ -18,5 +18,41 @@ func CheckEc2SecurityGroup(sg cloudformation.AWSEC2SecurityGroup) []Result {
 		results = append(results, r)
 	}
 
+	// Check for 0.0.0.0/0 in IPv4 CIDR blocks
+	if len(sg.SecurityGroupIngress) > 0 {
+		for _, rule := range sg.SecurityGroupIngress {
+			if rule.CidrIp == "0.0.0.0/0" {
+				r := NewResult(Failed, "security group rules should not use open 0.0.0.0/0 IPv4 blocks", rule.AWSCloudFormationType())
+				results = append(results, r)
+			}
+		}
+	}
+	if len(sg.SecurityGroupEgress) > 0 {
+		for _, rule := range sg.SecurityGroupEgress {
+			if rule.CidrIp == "0.0.0.0/0" {
+				r := NewResult(Failed, "security group rules should not use open 0.0.0.0/0 IPv4 blocks", rule.AWSCloudFormationType())
+				results = append(results, r)
+			}
+		}
+	}
+
+	// Check for ::/0 in IPv6 CIDR blocks
+	if len(sg.SecurityGroupIngress) > 0 {
+		for _, rule := range sg.SecurityGroupIngress {
+			if rule.CidrIp == "::/0" || rule.CidrIp == "0:0:0:0:0:0:0:0/0" {
+				r := NewResult(Failed, "security group rules should not use open ::/0 IPv6 blocks", rule.AWSCloudFormationType())
+				results = append(results, r)
+			}
+		}
+	}
+	if len(sg.SecurityGroupEgress) > 0 {
+		for _, rule := range sg.SecurityGroupEgress {
+			if rule.CidrIp == "::/0" || rule.CidrIp == "0:0:0:0:0:0:0:0/0" {
+				r := NewResult(Failed, "security group rules should not use open ::/0 in IPv6 blocks", rule.AWSCloudFormationType())
+				results = append(results, r)
+			}
+		}
+	}
+
 	return results
 }

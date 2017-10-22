@@ -1,13 +1,62 @@
 ---
 AWSTemplateFormatVersion: 2010-09-09
-Description: Minimal test CloudFormation template
+Description: Set of security groups with various problems
 
 Resources:
-    WithGroupDescription:
-        Type: AWS::EC2::SecurityGroup
-        Properties:
-            GroupDescription: An SG with a description
-
+    # Will fail the Group Description test
     NoGroupDescription:
         Type: AWS::EC2::SecurityGroup
         Properties:
+            SecurityGroupIngress:
+              - IpProtocol: tcp
+                FromPort: 80
+                ToPort: 80
+                CidrIp: 192.168.0.0/24
+            SecurityGroupEgress:
+              - IpProtocol: tcp
+                FromPort: 1025
+                ToPort: 65535
+                CidrIp: 192.168.0.0/24
+
+    # Will fail the open CIDR block test
+    OpenCidrSecurityGroup:
+        Type: AWS::EC2::SecurityGroup
+        Properties:
+            GroupDescription: Allow TCP/80 (HTTP) ingress from and to anywhere
+            SecurityGroupIngress:
+              - IpProtocol: tcp
+                FromPort: 80
+                ToPort: 80
+                CidrIp: 0.0.0.0/0
+            SecurityGroupEgress:
+              - IpProtocol: tcp
+                FromPort: 1025
+                ToPort: 65535
+                CidrIp: 0.0.0.0/0
+
+    # Will warn about no egress rules
+    NoEgressSecurityGroup:
+        Type: AWS::EC2::SecurityGroup
+        Properties:
+            GroupDescription: Allow TCP/80 (HTTP) ingress from 192.168.0.0/24
+            SecurityGroupIngress:
+              - IpProtocol: tcp
+                FromPort: 80
+                ToPort: 80
+                CidrIp: 192.168.0.0/24
+
+    # No fails or warnings
+    PerfectSecurityGroup:
+        Type: AWS::EC2::SecurityGroup
+        Properties:
+            GroupDescription: Allow TCP/80 (HTTP) ingress to and from 192.168.0.0/24
+            SecurityGroupIngress:
+              - IpProtocol: tcp
+                FromPort: 80
+                ToPort: 80
+                CidrIp: 192.168.0.0/24
+            SecurityGroupEgress:
+              - IpProtocol: tcp
+                FromPort: 1025
+                ToPort: 65535
+                CidrIp: 192.168.0.0/24
